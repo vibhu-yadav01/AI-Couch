@@ -1,0 +1,279 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AI Interview Coach API",
+    "description": "API backend for the AI Interview Coach React Native application. Provides JWT auth, resume parsing, speech and evaluation mock interview sessions, and analytics aggregates.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "description": "Registers a new candidate and returns a JWT token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                  "name": { "type": "string", "example": "John Doe" },
+                  "email": { "type": "string", "format": "email", "example": "johndoe@example.com" },
+                  "password": { "type": "string", "minLength": 6, "example": "securepassword123" },
+                  "targetRole": { "type": "string", "example": "Software Engineer" },
+                  "experienceLevel": { "type": "string", "enum": ["beginner", "intermediate", "advanced"], "example": "intermediate" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "User registered successfully" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string" },
+                            "name": { "type": "string" },
+                            "email": { "type": "string" },
+                            "targetRole": { "type": "string" },
+                            "experienceLevel": { "type": "string" }
+                          }
+                        },
+                        "token": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid input or email already registered" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "User login",
+        "description": "Authenticates user credentials and returns a JWT token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "johndoe@example.com" },
+                  "password": { "type": "string", "example": "securepassword123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Login successful" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": { "type": "object" },
+                        "token": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "summary": "Get user profile",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Profile data retrieved" }
+        }
+      },
+      "put": {
+        "summary": "Update user profile",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "John Doe Updated" },
+                  "targetRole": { "type": "string", "example": "Senior Software Engineer" },
+                  "experienceLevel": { "type": "string", "enum": ["beginner", "intermediate", "advanced"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profile updated successfully" }
+        }
+      }
+    },
+    "/resume/upload": {
+      "post": {
+        "summary": "Upload and parse resume",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resume": { "type": "string", "format": "binary", "description": "PDF or DOCX resume file" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Resume uploaded and parsed successfully" }
+        }
+      }
+    },
+    "/resume": {
+      "get": {
+        "summary": "Retrieve user's parsed resume",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Resume data retrieved successfully" }
+        }
+      }
+    },
+    "/interview/start": {
+      "post": {
+        "summary": "Start mock interview session",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["role", "type", "difficulty"],
+                "properties": {
+                  "role": { "type": "string", "example": "Software Engineer" },
+                  "type": { "type": "string", "enum": ["behavioral", "technical", "hr", "mixed"], "example": "technical" },
+                  "difficulty": { "type": "string", "enum": ["beginner", "intermediate", "advanced"], "example": "intermediate" },
+                  "duration": { "type": "integer", "minimum": 1, "maximum": 60, "example": 5 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Interview session started successfully" }
+        }
+      }
+    },
+    "/interview/answer": {
+      "post": {
+        "summary": "Submit interview question response",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["interviewId"],
+                "properties": {
+                  "interviewId": { "type": "string", "example": "65b9f71c4c3e8e24c52210a4" },
+                  "answerText": { "type": "string", "example": "Polymorphism is the ability of an object to take on many forms..." },
+                  "type": { "type": "string", "enum": ["text", "voice"], "example": "text" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Answer evaluated and saved" }
+        }
+      }
+    },
+    "/interview/complete": {
+      "post": {
+        "summary": "Mark interview session as completed",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["interviewId"],
+                "properties": {
+                  "interviewId": { "type": "string", "example": "65b9f71c4c3e8e24c52210a4" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Interview marked completed successfully" }
+        }
+      }
+    },
+    "/interview/history": {
+      "get": {
+        "summary": "Get user's mock interview history",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of past interview sessions" }
+        }
+      }
+    },
+    "/analytics/dashboard": {
+      "get": {
+        "summary": "Get analytics dashboard metrics",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Analytics aggregates and progress trends datasets" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+uploads/resumes/*
+uploads/audio/*
+!uploads/resumes/.gitkeep
+!uploads/audio/.gitkeep
+*.log
