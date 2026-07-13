@@ -59,8 +59,8 @@ export const startInterview = async (req: AuthRequest, res: Response): Promise<v
       }
     });
   } catch (err: any) {
-    console.error('Start interview error:', err);
-    res.status(500).json({ success: false, error: err.message || 'Server error' });
+    console.error('Start interview error:', err?.category ? `[${err.category}] ${err.message}` : err);
+    res.status(err?.status || 500).json({ success: false, error: err.message || 'Server error' });
   }
 };
 
@@ -141,8 +141,8 @@ export const submitTextAnswer = async (req: AuthRequest, res: Response): Promise
       }
     });
   } catch (err: any) {
-    console.error('Submit text answer error:', err);
-    res.status(500).json({ success: false, error: err.message || 'Server error' });
+    console.error('Submit text answer error:', err?.category ? `[${err.category}] ${err.message}` : err);
+    res.status(err?.status || 500).json({ success: false, error: err.message || 'Server error' });
   }
 };
 
@@ -246,8 +246,8 @@ export const submitVoiceAnswer = async (req: AuthRequest, res: Response): Promis
       }
     });
   } catch (err: any) {
-    console.error('Submit voice answer error:', err);
-    res.status(500).json({ success: false, error: err.message || 'Server error' });
+    console.error('Submit voice answer error:', err?.category ? `[${err.category}] ${err.message}` : err);
+    res.status(err?.status || 500).json({ success: false, error: err.message || 'Server error' });
   }
 };
 

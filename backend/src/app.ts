@@ -9,7 +9,8 @@ import resumeRoutes from './routes/resume.routes';
 import interviewRoutes from './routes/interview.routes';
 import analyticsRoutes from './routes/analytics.routes';
 import { errorHandler } from './middleware/error.middleware';
-
+import dotenv from "dotenv";
+dotenv.config();
 const app = express();
 
 // Security HTTP headers

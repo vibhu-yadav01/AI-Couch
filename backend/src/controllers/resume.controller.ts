@@ -74,8 +74,11 @@ export const uploadResume = async (req: AuthRequest, res: Response): Promise<voi
       }
     });
   } catch (err: any) {
-    console.error('Upload resume error:', err);
-    res.status(500).json({ success: false, error: err.message || 'Server error' });
+    // AIServiceError carries a meaningful typed HTTP status (AUTH/QUOTA/TIMEOUT/
+    // MALFORMED_RESPONSE/etc). Surface it instead of a blanket 500 so the client
+    // gets an explicit, honest failure rather than fabricated/empty resume data.
+    console.error('Upload resume error:', err?.category ? `[${err.category}] ${err.message}` : err);
+    res.status(err?.status || 500).json({ success: false, error: err.message || 'Server error' });
   }
 };
 

@@ -1,17 +1,23 @@
-import dotenv from 'dotenv';
 import path from 'path';
-
+import dotenv from "dotenv";
+dotenv.config();
 // Configure environment variables before importing App
 dotenv.config();
 
 import app from './app';
 import connectDB from './config/database';
+import { validateAIConfig } from './services/ai';
 
 const PORT = process.env.PORT || 5000;
 
 // Start database connection and listening
 const startServer = async () => {
   try {
+    // Fail fast on AI misconfiguration BEFORE accepting traffic, rather than
+    // deferring failures (and silent fallbacks) to the first AI request.
+    const aiConfig = validateAIConfig();
+    console.log(`🤖 AI provider: ${aiConfig.provider} (model: ${aiConfig.provider === 'gemini' ? aiConfig.geminiModel : aiConfig.openaiModel})`);
+
     await connectDB();
     
     const server = app.listen(PORT, () => {

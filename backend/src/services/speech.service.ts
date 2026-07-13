@@ -15,7 +15,11 @@ const FILLER_WORDS = [
  * @returns ISpeechAnalysis object with all computed metrics
  */
 export function analyzeSpeech(transcription: string, durationSeconds: number): ISpeechAnalysis {
-  if (!transcription || transcription.trim() === '' || transcription === '[Transcription unavailable]') {
+  // NOTE: The '[Transcription unavailable]' sentinel no longer reaches this function —
+  // transcribeAudio now throws AIServiceError('TRANSCRIPTION_FAILED') on failure, so a
+  // failed transcription surfaces as an explicit error rather than being analyzed as
+  // zeroed "fake success". Only a genuinely empty string is guarded here.
+  if (!transcription || transcription.trim() === '') {
     return {
       confidenceScore: 0,
       fillerWordCount: 0,

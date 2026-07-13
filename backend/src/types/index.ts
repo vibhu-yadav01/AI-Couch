@@ -1,5 +1,6 @@
 import { Request } from 'express';
-
+import dotenv from "dotenv";
+dotenv.config();
 export interface IUser {
   _id: string;
   name: string;
@@ -108,6 +109,41 @@ export interface AuthRequest extends Request {
     id: string;
     email: string;
   };
+}
+
+// ─── AI Provider Layer Contracts ────────────────────────────────────────────
+// The set of AI providers the application supports. Selected via AI_PROVIDER.
+export type AIProviderName = 'openai' | 'gemini';
+
+// Metadata attached to every AI response so the source is always observable.
+// `isFallback` is only ever set for an explicit, documented degraded-mode result;
+// on the normal success path it is absent/false and never set silently.
+export interface IAIResponseMeta {
+  provider: AIProviderName;
+  model: string;
+  durationMs: number;
+  isFallback?: boolean;
+}
+
+// Resume parsing — wraps the existing IResumeParsedData domain contract.
+export interface IAIResumeParseResult extends IAIResponseMeta {
+  parsedData: IResumeParsedData;
+}
+
+// Question generation — an array of the existing IQuestion domain contract.
+export interface IAIQuestionsResult extends IAIResponseMeta {
+  questions: IQuestion[];
+}
+
+// Answer evaluation — aligns exactly with the existing IEvaluation contract.
+export interface IAIEvaluationResult extends IAIResponseMeta {
+  evaluation: IEvaluation;
+}
+
+// Voice / transcription — the raw transcript feeding analyzeSpeech (ISpeechAnalysis).
+// `transcript` is always a real transcription — never a sentinel placeholder.
+export interface IAITranscriptionResult extends IAIResponseMeta {
+  transcript: string;
 }
 
 export interface APIResponse<T = any> {

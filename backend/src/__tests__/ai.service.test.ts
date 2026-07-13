@@ -136,9 +136,11 @@ describe('AI Interfacing Service', () => {
 
   describe('generateQuestions', () => {
     it('should return generated list of interview questions', async () => {
-      const result = await aiService.generateQuestions('Software Engineer', 'technical', 'beginner');
+      // The mock returns exactly 2 questions; request count=2 so the stricter
+      // "at least count" validation is satisfied (no generic default padding).
+      const result = await aiService.generateQuestions('Software Engineer', 'technical', 'beginner', undefined, 2);
       expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBeGreaterThan(0);
+      expect(result.length).toBe(2);
       expect(result[0]).toHaveProperty('text');
       expect(result[0]).toHaveProperty('type');
     });
