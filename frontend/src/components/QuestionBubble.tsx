@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../utils/colors';
 
@@ -17,8 +17,8 @@ export default function QuestionBubble({ text, timestamp }: QuestionBubbleProps)
   useEffect(() => {
     setDisplayedText('');
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 400, useNativeDriver: Platform.OS !== 'web' }),
     ]).start();
 
     let index = 0;

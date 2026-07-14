@@ -35,10 +35,10 @@ beforeEach(() => {
 });
 
 describe('No silent fallback — resume parsing', () => {
-  it('throws AUTH (not empty arrays) when the provider returns 401', async () => {
+  it('throws PROVIDER_AUTH (not empty arrays) when the provider returns 401', async () => {
     mockCreate.mockRejectedValue({ status: 401, message: 'invalid api key' });
     await expect(aiService.parseResume('Skills: React, Node.js')).rejects.toBeInstanceOf(AIServiceError);
-    await expect(aiService.parseResume('Skills: React, Node.js')).rejects.toMatchObject({ category: 'AUTH' });
+    await expect(aiService.parseResume('Skills: React, Node.js')).rejects.toMatchObject({ category: 'PROVIDER_AUTH' });
   });
 
   it('throws MALFORMED_RESPONSE (not empty arrays) on non-JSON output', async () => {

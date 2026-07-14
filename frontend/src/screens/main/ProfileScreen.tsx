@@ -266,11 +266,18 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
+    ...Platform.select({
+      web: {
+        boxShadow: `0px 4px 10px ${Colors.primary}26`,
+      },
+      default: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 10,
+        elevation: 4,
+      },
+    }),
   },
   avatarInitials: {
     fontSize: 32,

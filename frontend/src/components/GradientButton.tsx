@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ViewStyle,
   StyleProp,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../utils/colors';
@@ -38,7 +39,7 @@ export default function GradientButton({
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
       toValue: 0.96,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
       speed: 50,
       bounciness: 4,
     }).start();
@@ -47,7 +48,7 @@ export default function GradientButton({
   const handlePressOut = () => {
     Animated.spring(scaleAnim, {
       toValue: 1,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
       speed: 50,
       bounciness: 4,
     }).start();

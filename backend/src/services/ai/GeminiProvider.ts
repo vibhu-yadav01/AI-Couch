@@ -10,7 +10,7 @@ import {
   IAITranscriptionResult,
 } from '../../types';
 import { AIConfig } from './config';
-import { AIServiceError, classifyProviderError } from './errors';
+import { AIServiceError, classifyProviderError, sanitizeValue } from './errors';
 import { withRetry, withTimeout } from './runtime';
 import { aiLogger, AIFeature } from './logger';
 import { resumePrompt, questionsPrompt, evaluationPrompt, PromptPair } from './prompts';
@@ -29,6 +29,28 @@ const AUDIO_MIME: Record<string, string> = {
   webm: 'audio/webm',
   ogg: 'audio/ogg',
 };
+
+/**
+ * Extract and log secret-safe development diagnostics at the immediate Gemini provider boundary.
+ */
+function logBoundaryDiagnostics(err: any, feature: string, model: string): void {
+  const extracted = {
+    name: err?.name,
+    message: err?.message,
+    status: err?.status,
+    statusCode: err?.statusCode,
+    code: err?.code,
+    responseStatus: err?.response?.status,
+    responseDataErrorCode: err?.response?.data?.error?.code,
+    responseDataErrorStatus: err?.response?.data?.error?.status,
+    responseDataErrorMessage: err?.response?.data?.error?.message,
+    errorDetails: err?.errorDetails,
+  };
+  const sanitized = sanitizeValue(extracted);
+  console.error(
+    `[GeminiProvider Boundary Error] feature=${feature} model=${model} diagnostics=${JSON.stringify(sanitized, null, 2)}`
+  );
+}
 
 /**
  * Gemini implementation of the single AIProvider interface. This is one of the
@@ -51,8 +73,11 @@ export class GeminiProvider implements AIProvider {
   private async complete(prompt: PromptPair, feature: AIFeature): Promise<{ raw: string; durationMs: number }> {
     const promptChars = prompt.system.length + prompt.user.length;
     const start = Date.now();
-    const model = this.genAI.getGenerativeModel({ model: this.model });
-    const fullPrompt = `${prompt.system}\n\n${prompt.user}`;
+    const model = this.genAI.getGenerativeModel({
+      model: this.model,
+      systemInstruction: prompt.system,
+    });
+    const fullPrompt = prompt.user;
 
     const raw = await withRetry(
       () =>
@@ -61,6 +86,7 @@ export class GeminiProvider implements AIProvider {
             .generateContent(fullPrompt)
             .then((result) => result.response.text())
             .catch((err) => {
+              logBoundaryDiagnostics(err, feature, this.model);
               throw classifyProviderError(err, { provider: this.name, model: this.model });
             }),
           this.config.timeoutMs,
@@ -137,6 +163,7 @@ export class GeminiProvider implements AIProvider {
             ])
             .then((result) => result.response.text())
             .catch((err) => {
+              logBoundaryDiagnostics(err, 'transcribeAudio', this.model);
               throw classifyProviderError(err, ctx);
             }),
           this.config.timeoutMs,
@@ -151,3 +178,4 @@ export class GeminiProvider implements AIProvider {
     return { transcript, provider: this.name, model: this.model, durationMs };
   }
 }
+

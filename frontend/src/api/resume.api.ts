@@ -1,9 +1,8 @@
 import apiClient from './client';
 
 export const uploadResume = async (formData: FormData) => {
-  const response = await apiClient.post('/resume/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const response = await apiClient.post('/resume/upload', formData);
+
   return response.data;
 };
 

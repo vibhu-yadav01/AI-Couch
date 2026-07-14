@@ -19,6 +19,7 @@ import GlassCard from '../../components/GlassCard';
 import GradientButton from '../../components/GradientButton';
 import { useInterview } from '../../context/InterviewContext';
 import { HomeStackParamList } from '../../navigation/AppNavigator';
+import { extractErrorMessage } from '../../utils/error';
 
 type InterviewType = 'behavioral' | 'technical' | 'hr' | 'mixed';
 type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
@@ -67,7 +68,7 @@ export default function InterviewSetupScreen() {
       }
     } catch (error: any) {
       console.error('Start interview error:', error);
-      Alert.alert('Error', error.message || 'An error occurred. Please try again.');
+      Alert.alert('Error', extractErrorMessage(error));
     }
   };
 

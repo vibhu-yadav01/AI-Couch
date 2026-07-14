@@ -22,9 +22,9 @@ describe('AIServiceError category -> HTTP status mapping', () => {
 });
 
 describe('classifyProviderError', () => {
-  it('maps 401 to AUTH (non-retryable)', () => {
+  it('maps 401 to PROVIDER_AUTH (non-retryable)', () => {
     const e = classifyProviderError({ status: 401, message: 'invalid api key' });
-    expect(e.category).toBe('AUTH');
+    expect(e.category).toBe('PROVIDER_AUTH');
     expect(isRetryable(e)).toBe(false);
   });
 
@@ -34,16 +34,28 @@ describe('classifyProviderError', () => {
     expect(isRetryable(e)).toBe(false);
   });
 
-  it('maps a plain rate limit to a retryable QUOTA', () => {
+  it('maps a plain rate limit to a retryable RATE_LIMIT', () => {
     const e = classifyProviderError({ status: 429, message: 'Rate limit reached' });
-    expect(e.category).toBe('QUOTA');
+    expect(e.category).toBe('RATE_LIMIT');
     expect(isRetryable(e)).toBe(true);
+  });
+
+  it('maps 404 to MODEL_UNAVAILABLE (non-retryable)', () => {
+    const e = classifyProviderError({ status: 404, message: 'model gemini-2.5-flash is no longer available' });
+    expect(e.category).toBe('MODEL_UNAVAILABLE');
+    expect(isRetryable(e)).toBe(false);
+  });
+
+  it('maps 400 to INVALID_REQUEST (non-retryable)', () => {
+    const e = classifyProviderError({ status: 400, message: 'invalid arguments' });
+    expect(e.category).toBe('INVALID_REQUEST');
+    expect(isRetryable(e)).toBe(false);
   });
 
   it('maps timeouts to TIMEOUT (retryable)', () => {
     const e = classifyProviderError({ message: 'request timed out' });
     expect(e.category).toBe('TIMEOUT');
-    expect(isTransient(e.category)).toBe(true);
+    expect(isRetryable(e)).toBe(true);
   });
 
   it('maps 5xx / network to PROVIDER_UNAVAILABLE (retryable)', () => {

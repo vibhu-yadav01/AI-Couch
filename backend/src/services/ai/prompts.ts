@@ -60,10 +60,10 @@ Candidate Experience: ${experience}
 Requirements:
 - Questions MUST be specific to the "${role}" role — a Data Analyst, Software Engineer, and Product Manager should receive clearly different questions.
 - Calibrate difficulty to "${difficulty}".
-- For "technical" type: focus on role-specific technical skills, problem-solving, and design.
-- For "behavioral" type: use STAR-method questions about past experiences.
-- For "hr" type: ask about motivation, culture fit, and goals.
-- For "mixed" type: combine the above.
+- If Interview Type is "technical", focus on role-specific technical skills, problem-solving, and design. The "type" of every question in the JSON output MUST be "technical".
+- If Interview Type is "behavioral", use STAR-method questions about past experiences. The "type" of every question in the JSON output MUST be "behavioral".
+- If Interview Type is "hr", ask about motivation, culture fit, and goals. The "type" of every question in the JSON output MUST be "hr".
+- If Interview Type is "mixed", combine the above.
 
 Return ONLY a JSON array:
 [

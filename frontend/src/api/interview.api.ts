@@ -25,7 +25,6 @@ export const submitVoiceAnswer = async (
   formData.append('questionIndex', String(questionIndex));
 
   const response = await apiClient.post(`/interview/${interviewId}/answer/voice`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
 };
@@ -37,5 +36,10 @@ export const getInterviewHistory = async () => {
 
 export const getInterview = async (id: string) => {
   const response = await apiClient.get(`/interview/${id}`);
+  return response.data;
+};
+
+export const completeInterview = async (interviewId: string) => {
+  const response = await apiClient.post('/interview/complete', { interviewId });
   return response.data;
 };

@@ -17,6 +17,32 @@ jest.mock('../models/Analytics');
 jest.mock('pdf-parse', () => {
   return jest.fn().mockImplementation(() => Promise.resolve({ text: 'mocked resume text' }));
 });
+
+jest.mock('../services/ai.service', () => ({
+  parseResume: jest.fn().mockResolvedValue({
+    skills: ['JavaScript'],
+    experience: [],
+    education: [],
+    certifications: [],
+    projects: []
+  }),
+  generateQuestions: jest.fn().mockResolvedValue([
+    { text: 'Describe a challenging project you worked on.', type: 'behavioral' },
+    { text: 'How do you handle state in React?', type: 'technical' }
+  ]),
+  evaluateAnswer: jest.fn().mockResolvedValue({
+    score: 85,
+    relevance: 90,
+    clarity: 80,
+    communication: 85,
+    technicalAccuracy: 88,
+    confidence: 80,
+    strengths: ['Clear explanation'],
+    improvements: ['Could add code examples']
+  }),
+  transcribeAudio: jest.fn().mockResolvedValue('Mocked transcription text')
+}));
+
 jest.setTimeout(30000);
 
 describe('E2E Verification Mock Run', () => {

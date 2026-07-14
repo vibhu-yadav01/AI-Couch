@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Modal } from 'react-native';
+import { View, Text, StyleSheet, Animated, Modal, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../utils/colors';
 
@@ -18,8 +18,8 @@ export default function LoadingOverlay({ visible = false, message = 'Processing.
       Animated.loop(
         Animated.sequence([
           Animated.delay(delay),
-          Animated.timing(anim, { toValue: 1, duration: 800, useNativeDriver: true }),
-          Animated.timing(anim, { toValue: 0.3, duration: 800, useNativeDriver: true }),
+          Animated.timing(anim, { toValue: 1, duration: 800, useNativeDriver: Platform.OS !== 'web' }),
+          Animated.timing(anim, { toValue: 0.3, duration: 800, useNativeDriver: Platform.OS !== 'web' }),
         ])
       );
 
@@ -82,11 +82,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   circle: {
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 12,
-    elevation: 8,
+    ...Platform.select({
+      web: {
+        boxShadow: `0px 0px 12px ${Colors.primary}cc`,
+      },
+      default: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 12,
+        elevation: 8,
+      },
+    }),
   },
   message: {
     color: Colors.text,

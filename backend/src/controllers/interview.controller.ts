@@ -131,7 +131,6 @@ export const submitTextAnswer = async (req: AuthRequest, res: Response): Promise
 
     res.json({
       success: true,
-      interview,
       data: {
         interview,
         isCompleted: isLastQuestion,
@@ -234,7 +233,6 @@ export const submitVoiceAnswer = async (req: AuthRequest, res: Response): Promis
 
     res.json({
       success: true,
-      interview,
       data: {
         interview,
         isCompleted: isLastQuestion,

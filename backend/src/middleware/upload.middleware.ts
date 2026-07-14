@@ -61,7 +61,7 @@ const audioFileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ) => {
-  const allowedMimes = ['audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/webm', 'audio/ogg', 'audio/x-m4a'];
+  const allowedMimes = ['audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/m4a', 'audio/webm', 'audio/ogg', 'audio/x-m4a'];
   const allowedExts = ['.mp3', '.wav', '.m4a', '.webm', '.ogg'];
   const ext = path.extname(file.originalname).toLowerCase();
 

@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   StatusBar,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -21,6 +22,7 @@ import QuestionBubble from '../../components/QuestionBubble';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import { useInterview } from '../../context/InterviewContext';
 import { HomeStackParamList } from '../../navigation/AppNavigator';
+import { extractErrorMessage } from '../../utils/error';
 
 export default function TextInterviewScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
@@ -56,9 +58,19 @@ export default function TextInterviewScreen() {
     if (!inputText.trim() || isLoading) return;
     const textToSend = inputText.trim();
     setInputText('');
-    
-    // Submit answer to backend
-    await submitAnswer(textToSend);
+    try {
+      await submitAnswer(textToSend);
+    } catch (error: any) {
+      const msg = extractErrorMessage(error);
+      console.error('[TextInterviewScreen.handleSend Error]', {
+        name: error?.name || 'Error',
+        status: error?.status || error?.response?.status || 'unknown',
+        backendMessage: error?.response?.data?.error || error?.message || 'none',
+        genericMessage: msg,
+      });
+      Alert.alert('Submission Error', msg);
+      setInputText(textToSend); // restore user's input
+    }
   };
 
   const getFormatTime = (seconds: number) => {

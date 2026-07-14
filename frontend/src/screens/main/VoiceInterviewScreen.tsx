@@ -21,6 +21,7 @@ import GlassCard from '../../components/GlassCard';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import { useInterview } from '../../context/InterviewContext';
 import { HomeStackParamList } from '../../navigation/AppNavigator';
+import { extractErrorMessage } from '../../utils/error';
 
 export default function VoiceInterviewScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
@@ -70,12 +71,12 @@ export default function VoiceInterviewScreen() {
           Animated.timing(pulseAnim, {
             toValue: 1.3,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           Animated.timing(pulseAnim, {
             toValue: 1.0,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
         ])
       );
@@ -150,8 +151,12 @@ export default function VoiceInterviewScreen() {
       setRecording(null);
 
       if (uri) {
-        // Send audio answer to backend (also pass recorded duration)
-        await submitVoiceAnswer(uri);
+        try {
+          await submitVoiceAnswer(uri);
+        } catch (error: any) {
+          const msg = extractErrorMessage(error);
+          Alert.alert('Recording Submission Failed', msg);
+        }
       }
     } catch (err) {
       console.error('Failed to stop recording:', err);
@@ -438,15 +443,29 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    ...Platform.select({
+      web: {
+        boxShadow: `0px 4px 10px ${Colors.primary}4d`,
+      },
+      default: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 8,
+      },
+    }),
   },
   micButtonRecording: {
     backgroundColor: Colors.error,
-    shadowColor: Colors.error,
+    ...Platform.select({
+      web: {
+        boxShadow: `0px 4px 10px ${Colors.error}4d`,
+      },
+      default: {
+        shadowColor: Colors.error,
+      },
+    }),
   },
   micButtonDisabled: {
     backgroundColor: Colors.textMuted,

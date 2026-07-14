@@ -9,6 +9,7 @@ import {
   Alert,
   SafeAreaView,
   StatusBar,
+  Platform,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
@@ -17,6 +18,7 @@ import GlassCard from '../../components/GlassCard';
 import GradientButton from '../../components/GradientButton';
 import { uploadResume, getUserResume } from '../../api/resume.api';
 import { Resume } from '../../types';
+import { extractErrorMessage } from '../../utils/error';
 
 export default function ResumeScreen() {
   const [loading, setLoading] = useState(false);
@@ -66,11 +68,22 @@ export default function ResumeScreen() {
       setLoading(true);
 
       const formData = new FormData();
-      formData.append('resume', {
-        uri: fileAsset.uri,
-        name: fileAsset.name,
-        type: fileAsset.mimeType || 'application/pdf',
-      } as any);
+      if (Platform.OS === 'web') {
+        const fileAssetAny = fileAsset as any;
+        if (fileAssetAny.file) {
+          formData.append('resume', fileAssetAny.file, fileAsset.name);
+        } else {
+          const response = await fetch(fileAsset.uri);
+          const blob = await response.blob();
+          formData.append('resume', blob, fileAsset.name);
+        }
+      } else {
+        formData.append('resume', {
+          uri: fileAsset.uri,
+          name: fileAsset.name,
+          type: fileAsset.mimeType || 'application/pdf',
+        } as any);
+      }
 
       const response = await uploadResume(formData);
 
@@ -83,7 +96,7 @@ export default function ResumeScreen() {
       }
     } catch (error: any) {
       console.error('Document picker error:', error);
-      Alert.alert('Error', error.message || 'An error occurred during file upload.');
+      Alert.alert('Error', extractErrorMessage(error));
     } finally {
       setLoading(false);
     }

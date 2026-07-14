@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import { Colors } from '../../utils/colors';
+import { extractErrorMessage } from '../../utils/error';
 import GradientButton from '../../components/GradientButton';
 import { AuthStackParamList } from '../../navigation/AppNavigator';
 
@@ -46,8 +47,8 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 10, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 700, useNativeDriver: Platform.OS !== 'web' }),
+      Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 10, useNativeDriver: Platform.OS !== 'web' }),
     ]).start();
   }, []);
 
@@ -69,7 +70,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
     try {
       await register(name.trim(), email.trim(), password);
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Registration failed. Please try again.');
+      setError(extractErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -264,8 +265,18 @@ const styles = StyleSheet.create({
   logoCircle: {
     width: 64, height: 64, borderRadius: 20,
     alignItems: 'center', justifyContent: 'center', marginBottom: 12,
-    shadowColor: Colors.primary, shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4, shadowRadius: 16, elevation: 12,
+    ...Platform.select({
+      web: {
+        boxShadow: `0px 8px 16px ${Colors.primary}66`,
+      },
+      default: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 16,
+        elevation: 12,
+      },
+    }),
   },
   formTitle: { fontSize: 26, fontWeight: '800', color: Colors.text, marginBottom: 6, letterSpacing: -0.5 },
   formSubtitle: { fontSize: 14, color: Colors.textSecondary, textAlign: 'center', maxWidth: 240 },

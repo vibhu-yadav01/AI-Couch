@@ -18,7 +18,7 @@
   "success": true,
   "message": "Registration successful",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzgzMzQ4MDExLCJleHAiOjE3ODM0MzQ0MTF9.vGeofK4wLRSdvDkRn33ZR203FX2ep3BpDy0Rkx-FbpU",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0MDUzNjExLCJleHAiOjE3ODQxNDAwMTF9.uG3JjLnRMcrX_RD9zIPX6-QHJJ7ag-bDLrFR25WFYnA",
     "user": {
       "id": "mock_user_123",
       "name": "E2E Tester",
@@ -45,7 +45,7 @@
   "success": true,
   "message": "Login successful",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzgzMzQ4MDExLCJleHAiOjE3ODM0MzQ0MTF9.vGeofK4wLRSdvDkRn33ZR203FX2ep3BpDy0Rkx-FbpU",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0MDUzNjExLCJleHAiOjE3ODQxNDAwMTF9.uG3JjLnRMcrX_RD9zIPX6-QHJJ7ag-bDLrFR25WFYnA",
     "user": {
       "id": "mock_user_123",
       "email": "e2e@tester.com"
@@ -80,7 +80,7 @@
 ```json
 {
   "success": false,
-  "error": "AI provider quota exhausted (billing/credits). Check the account plan and billing."
+  "error": "Failed to generate interview questions. Please try again."
 }
 ```
 

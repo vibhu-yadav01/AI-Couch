@@ -86,14 +86,9 @@ export default function AnalyticsScreen() {
     },
   };
 
-  // Compile Chart Datasets
-  // If no sessions, use dummy structures for preview but grayed out/labeled
-  const scoreHistoryLabels = data?.scoreHistory?.length > 0
-    ? data.scoreHistory.map((h: any) => h.date)
-    : ['T1', 'T2', 'T3', 'T4', 'T5'];
-  const scoreHistoryValues = data?.scoreHistory?.length > 0
-    ? data.scoreHistory.map((h: any) => h.score)
-    : [65, 70, 72, 78, 85];
+  // Compile Chart Datasets (no dummy fallbacks)
+  const scoreHistoryLabels = data?.scoreHistory?.map((h: any) => h.date) || [];
+  const scoreHistoryValues = data?.scoreHistory?.map((h: any) => h.score) || [];
 
   const skillLabels = ['Comm', 'Tech', 'Behav', 'Lead'];
   const skillValues = [
@@ -103,19 +98,33 @@ export default function AnalyticsScreen() {
     data?.skillScores?.leadership || 0,
   ];
 
-  const fillerWordTrendLabels = data?.fillerWordTrend?.length > 0
-    ? data.fillerWordTrend.map((h: any) => h.date)
-    : ['T1', 'T2', 'T3', 'T4', 'T5'];
-  const fillerWordTrendValues = data?.fillerWordTrend?.length > 0
-    ? data.fillerWordTrend.map((h: any) => h.count)
-    : [12, 8, 9, 5, 2];
+  const fillerWordTrendLabels = data?.fillerWordTrend?.map((h: any) => h.date) || [];
+  const fillerWordTrendValues = data?.fillerWordTrend?.map((h: any) => h.count) || [];
 
-  const confidenceTrendLabels = data?.confidenceTrend?.length > 0
-    ? data.confidenceTrend.map((h: any) => h.date)
-    : ['T1', 'T2', 'T3', 'T4', 'T5'];
-  const confidenceTrendValues = data?.confidenceTrend?.length > 0
-    ? data.confidenceTrend.map((h: any) => h.score)
-    : [60, 68, 70, 75, 88];
+  const confidenceTrendLabels = data?.confidenceTrend?.map((h: any) => h.date) || [];
+  const confidenceTrendValues = data?.confidenceTrend?.map((h: any) => h.score) || [];
+
+  // Safety padding for single data points to avoid division-by-zero crashes in react-native-chart-kit
+  let paddedScoreLabels = scoreHistoryLabels;
+  let paddedScoreValues = scoreHistoryValues;
+  if (scoreHistoryValues.length === 1) {
+    paddedScoreLabels = ['', scoreHistoryLabels[0]];
+    paddedScoreValues = [scoreHistoryValues[0], scoreHistoryValues[0]];
+  }
+
+  let paddedConfLabels = confidenceTrendLabels;
+  let paddedConfValues = confidenceTrendValues;
+  if (confidenceTrendValues.length === 1) {
+    paddedConfLabels = ['', confidenceTrendLabels[0]];
+    paddedConfValues = [confidenceTrendValues[0], confidenceTrendValues[0]];
+  }
+
+  let paddedFillerLabels = fillerWordTrendLabels;
+  let paddedFillerValues = fillerWordTrendValues;
+  if (fillerWordTrendValues.length === 1) {
+    paddedFillerLabels = ['', fillerWordTrendLabels[0]];
+    paddedFillerValues = [fillerWordTrendValues[0], fillerWordTrendValues[0]];
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -184,67 +193,83 @@ export default function AnalyticsScreen() {
             {/* Score History Line Chart */}
             <Text style={styles.chartTitle}>Overall Score Trend</Text>
             <GlassCard style={styles.chartCard}>
-              <LineChart
-                data={{
-                  labels: scoreHistoryLabels,
-                  datasets: [{ data: scoreHistoryValues }],
-                }}
-                width={screenWidth - 56}
-                height={200}
-                yAxisSuffix="%"
-                chartConfig={chartConfig}
-                bezier
-                style={styles.chartStyle}
-              />
+              {scoreHistoryValues.length > 0 ? (
+                <LineChart
+                  data={{
+                    labels: paddedScoreLabels,
+                    datasets: [{ data: paddedScoreValues }],
+                  }}
+                  width={screenWidth - 56}
+                  height={200}
+                  yAxisSuffix="%"
+                  chartConfig={chartConfig}
+                  bezier={paddedScoreValues.length > 1}
+                  style={styles.chartStyle}
+                />
+              ) : (
+                <Text style={styles.noDataText}>No score history available</Text>
+              )}
             </GlassCard>
 
-            {/* Skills Bar Chart */}
+            {/* Skills Breakdown */}
             <Text style={styles.chartTitle}>Skills Breakdown</Text>
             <GlassCard style={styles.chartCard}>
-              <BarChart
-                data={{
-                  labels: skillLabels,
-                  datasets: [{ data: skillValues }],
-                }}
-                width={screenWidth - 56}
-                height={200}
-                yAxisLabel=""
-                yAxisSuffix="%"
-                chartConfig={chartConfig}
-                style={styles.chartStyle}
-              />
+              {skillValues.some(v => v > 0) ? (
+                <BarChart
+                  data={{
+                    labels: skillLabels,
+                    datasets: [{ data: skillValues }],
+                  }}
+                  width={screenWidth - 56}
+                  height={200}
+                  yAxisLabel=""
+                  yAxisSuffix="%"
+                  chartConfig={chartConfig}
+                  style={styles.chartStyle}
+                />
+              ) : (
+                <Text style={styles.noDataText}>No skills breakdown available</Text>
+              )}
             </GlassCard>
 
             {/* Confidence Trend */}
             <Text style={styles.chartTitle}>Confidence Trend</Text>
             <GlassCard style={styles.chartCard}>
-              <LineChart
-                data={{
-                  labels: confidenceTrendLabels,
-                  datasets: [{ data: confidenceTrendValues }],
-                }}
-                width={screenWidth - 56}
-                height={200}
-                yAxisSuffix="%"
-                chartConfig={secondaryChartConfig}
-                bezier
-                style={styles.chartStyle}
-              />
+              {confidenceTrendValues.length > 0 ? (
+                <LineChart
+                  data={{
+                    labels: paddedConfLabels,
+                    datasets: [{ data: paddedConfValues }],
+                  }}
+                  width={screenWidth - 56}
+                  height={200}
+                  yAxisSuffix="%"
+                  chartConfig={secondaryChartConfig}
+                  bezier={paddedConfValues.length > 1}
+                  style={styles.chartStyle}
+                />
+              ) : (
+                <Text style={styles.noDataText}>No confidence trend available</Text>
+              )}
             </GlassCard>
 
             {/* Filler Word Trend */}
             <Text style={styles.chartTitle}>Filler Words Trend</Text>
             <GlassCard style={styles.chartCard}>
-              <LineChart
-                data={{
-                  labels: fillerWordTrendLabels,
-                  datasets: [{ data: fillerWordTrendValues }],
-                }}
-                width={screenWidth - 56}
-                height={200}
-                chartConfig={chartConfig}
-                style={styles.chartStyle}
-              />
+              {fillerWordTrendValues.length > 0 ? (
+                <LineChart
+                  data={{
+                    labels: paddedFillerLabels,
+                    datasets: [{ data: paddedFillerValues }],
+                  }}
+                  width={screenWidth - 56}
+                  height={200}
+                  chartConfig={chartConfig}
+                  style={styles.chartStyle}
+                />
+              ) : (
+                <Text style={styles.noDataText}>No filler words trend available</Text>
+              )}
             </GlassCard>
           </View>
         )}
@@ -351,5 +376,12 @@ const styles = StyleSheet.create({
   chartStyle: {
     borderRadius: 12,
     marginVertical: 4,
+  },
+  noDataText: {
+    color: Colors.textMuted,
+    fontSize: 14,
+    paddingVertical: 35,
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });

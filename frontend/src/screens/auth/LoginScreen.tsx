@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import { Colors } from '../../utils/colors';
+import { extractErrorMessage } from '../../utils/error';
 import GradientButton from '../../components/GradientButton';
 import { AuthStackParamList } from '../../navigation/AppNavigator';
 
@@ -37,9 +38,9 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
-      Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 10, useNativeDriver: true }),
-      Animated.spring(logoScale, { toValue: 1, tension: 50, friction: 8, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: Platform.OS !== 'web' }),
+      Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 10, useNativeDriver: Platform.OS !== 'web' }),
+      Animated.spring(logoScale, { toValue: 1, tension: 50, friction: 8, useNativeDriver: Platform.OS !== 'web' }),
     ]).start();
   }, []);
 
@@ -53,7 +54,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     try {
       await login(email.trim(), password);
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Login failed. Please check your credentials.');
+      setError(extractErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -221,11 +222,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 12,
+    ...Platform.select({
+      web: {
+        boxShadow: `0px 8px 16px ${Colors.primary}66`,
+      },
+      default: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 16,
+        elevation: 12,
+      },
+    }),
   },
   appTitle: {
     fontSize: 26,

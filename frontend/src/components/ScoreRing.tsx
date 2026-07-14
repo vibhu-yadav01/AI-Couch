@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle, G } from 'react-native-svg';
 import { Colors } from '../utils/colors';
 
@@ -11,8 +11,6 @@ interface ScoreRingProps {
   label?: string;
 }
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-
 export default function ScoreRing({
   score,
   size = 140,
@@ -20,22 +18,10 @@ export default function ScoreRing({
   color = Colors.primary,
   label = 'Score',
 }: ScoreRingProps) {
-  const animatedValue = useRef(new Animated.Value(0)).current;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-
-  useEffect(() => {
-    Animated.timing(animatedValue, {
-      toValue: score,
-      duration: 1500,
-      useNativeDriver: false,
-    }).start();
-  }, [score]);
-
-  const strokeDashoffset = animatedValue.interpolate({
-    inputRange: [0, 100],
-    outputRange: [circumference, 0],
-  });
+  const clampedScore = Math.min(100, Math.max(0, score || 0));
+  const strokeDashoffset = circumference - (clampedScore / 100) * circumference;
 
   const getScoreColor = (s: number) => {
     if (s >= 80) return Colors.success;
@@ -43,12 +29,12 @@ export default function ScoreRing({
     return Colors.error;
   };
 
-  const ringColor = getScoreColor(score);
+  const ringColor = getScoreColor(clampedScore);
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-        <G rotation="-90" origin={`${size / 2}, ${size / 2}`}>
+        <G rotation={-90} originX={size / 2} originY={size / 2}>
           <Circle
             cx={size / 2}
             cy={size / 2}
@@ -57,7 +43,7 @@ export default function ScoreRing({
             strokeWidth={strokeWidth}
             fill="transparent"
           />
-          <AnimatedCircle
+          <Circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
@@ -71,7 +57,7 @@ export default function ScoreRing({
         </G>
       </Svg>
       <View style={styles.centerContent}>
-        <Text style={[styles.scoreText, { color: ringColor }]}>{Math.round(score)}</Text>
+        <Text style={[styles.scoreText, { color: ringColor }]}>{Math.round(clampedScore)}</Text>
         <Text style={styles.labelText}>{label}</Text>
       </View>
     </View>
