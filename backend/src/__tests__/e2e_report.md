@@ -18,7 +18,7 @@
   "success": true,
   "message": "Registration successful",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0MDUzNjExLCJleHAiOjE3ODQxNDAwMTF9.uG3JjLnRMcrX_RD9zIPX6-QHJJ7ag-bDLrFR25WFYnA",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0MzEyMDE3LCJleHAiOjE3ODQzOTg0MTd9.GhlzdRCCuObJKkiobxnZQ4PknQ9KxTVR6374NPSkxVo",
     "user": {
       "id": "mock_user_123",
       "name": "E2E Tester",
@@ -45,7 +45,7 @@
   "success": true,
   "message": "Login successful",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0MDUzNjExLCJleHAiOjE3ODQxNDAwMTF9.uG3JjLnRMcrX_RD9zIPX6-QHJJ7ag-bDLrFR25WFYnA",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0MzEyMDE4LCJleHAiOjE3ODQzOTg0MTh9.FK-AxtxFsQHJASi1IDuHbo0r58kV9xqViBfhJIfSnXg",
     "user": {
       "id": "mock_user_123",
       "email": "e2e@tester.com"

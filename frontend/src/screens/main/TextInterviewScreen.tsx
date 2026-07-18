@@ -125,7 +125,7 @@ export default function TextInterviewScreen() {
           style={styles.closeButton} 
           onPress={() => {
             resetInterview();
-            navigation.navigate('HomeMain');
+            (navigation as any).navigate('Home', { screen: 'HomeMain' });
           }}
         >
           <Ionicons name="close" size={24} color={Colors.textSecondary} />
@@ -294,6 +294,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 20,
     width: '100%',
+    flexShrink: 1,
   },
   bubbleRowAi: {
     justifyContent: 'flex-start',
@@ -314,6 +315,8 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 14,
     lineHeight: 20,
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   inputContainer: {
     flexDirection: 'row',

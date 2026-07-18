@@ -35,7 +35,9 @@ const resumeFileFilter = (
   if (allowed.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Only PDF and DOCX files are allowed for resume upload'));
+    const error = new Error('Only PDF and DOCX files are allowed for resume upload') as any;
+    error.status = 400;
+    cb(error);
   }
 };
 

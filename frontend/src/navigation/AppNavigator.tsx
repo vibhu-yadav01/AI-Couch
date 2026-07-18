@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { Colors } from '../utils/colors';
 
 // Auth Screens
+import WelcomeScreen from '../screens/auth/WelcomeScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 
@@ -24,6 +25,7 @@ import ProfileScreen from '../screens/main/ProfileScreen';
 import InterviewHistoryScreen from '../screens/main/InterviewHistoryScreen';
 
 export type AuthStackParamList = {
+  Welcome: undefined;
   Login: undefined;
   Register: undefined;
 };
@@ -164,6 +166,7 @@ function MainTabs() {
 function AuthStackNavigator() {
   return (
     <AuthStack.Navigator screenOptions={screenOptions}>
+      <AuthStack.Screen name="Welcome" component={WelcomeScreen} />
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Register" component={RegisterScreen} />
     </AuthStack.Navigator>

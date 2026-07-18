@@ -202,7 +202,7 @@ export default function VoiceInterviewScreen() {
           style={styles.closeButton}
           onPress={() => {
             resetInterview();
-            navigation.navigate('HomeMain');
+            (navigation as any).navigate('Home', { screen: 'HomeMain' });
           }}
         >
           <Ionicons name="close" size={24} color={Colors.textSecondary} />
@@ -401,6 +401,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.text,
     lineHeight: 25,
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   visualizerContainer: {
     flex: 1,

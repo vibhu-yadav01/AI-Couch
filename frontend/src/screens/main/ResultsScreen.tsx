@@ -96,7 +96,7 @@ export default function ResultsScreen() {
         <Text style={styles.errorText}>No interview details found.</Text>
         <GradientButton
           title="Return Home"
-          onPress={() => navigation.navigate('HomeMain')}
+          onPress={() => (navigation as any).navigate('Home', { screen: 'HomeMain' })}
           gradientColors={Colors.gradient.primary}
           style={styles.errorButton}
         />
@@ -295,7 +295,7 @@ export default function ResultsScreen() {
             style={styles.ctaButton}
           />
           <View style={styles.secondaryButtonsRow}>
-            <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.navigate('HomeMain')}>
+            <TouchableOpacity style={styles.secondaryBtn} onPress={() => (navigation as any).navigate('Home', { screen: 'HomeMain' })}>
               <Ionicons name="home-outline" size={18} color={Colors.text} />
               <Text style={styles.secondaryBtnText}>Dashboard</Text>
             </TouchableOpacity>

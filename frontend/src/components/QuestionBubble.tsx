@@ -59,6 +59,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginVertical: 8,
     paddingHorizontal: 16,
+    flexShrink: 1,
+    width: '100%',
   },
   avatarContainer: {
     width: 36,
@@ -92,6 +94,8 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontSize: 15,
     lineHeight: 22,
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   timestamp: {
     color: Colors.textMuted,

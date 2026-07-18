@@ -65,6 +65,21 @@ export default function ResumeScreen() {
         return;
       }
 
+      // Check if file is empty
+      if (fileAsset.size === 0) {
+        Alert.alert('Empty File', 'The selected file is empty. Please select a valid document.');
+        return;
+      }
+
+      // Verify file extension
+      const fileName = fileAsset.name || '';
+      const ext = fileName.split('.').pop()?.toLowerCase();
+      const allowedExts = ['pdf', 'docx', 'doc'];
+      if (!ext || !allowedExts.includes(ext)) {
+        Alert.alert('Unsupported File', 'Only PDF, DOCX, and DOC files are allowed.');
+        return;
+      }
+
       setLoading(true);
 
       const formData = new FormData();
