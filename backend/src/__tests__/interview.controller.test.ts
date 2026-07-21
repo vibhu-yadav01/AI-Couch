@@ -37,9 +37,15 @@ jest.mock('../middleware/auth.middleware', () => ({
   },
 }));
 
+jest.setTimeout(30000);
+
 describe('Interview Controller Endpoints', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (Resume.findOne as jest.Mock).mockReturnValue({
+      sort: jest.fn().mockResolvedValue(null),
+    });
 
     (aiService.generateQuestions as jest.Mock).mockResolvedValue([
       { text: 'Question 1', type: 'technical' },

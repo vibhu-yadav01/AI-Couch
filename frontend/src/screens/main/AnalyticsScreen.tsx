@@ -9,14 +9,64 @@ import {
   Dimensions,
   SafeAreaView,
   StatusBar,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LineChart, BarChart } from 'react-native-chart-kit';
 import { Colors } from '../../utils/colors';
 import GlassCard from '../../components/GlassCard';
+import ErrorBoundary from '../../components/ErrorBoundary';
+import CustomSVGChart from '../../components/CustomSVGChart';
 import { getDashboard } from '../../api/analytics.api';
 
+// Dynamically import react-native-chart-kit to prevent Web load crashes
+let LineChart: any = null;
+let BarChart: any = null;
+if (Platform.OS !== 'web') {
+  try {
+    const chartKit = require('react-native-chart-kit');
+    LineChart = chartKit.LineChart;
+    BarChart = chartKit.BarChart;
+  } catch (err) {
+    console.warn('Failed to load react-native-chart-kit dynamically:', err);
+  }
+}
+
 const screenWidth = Dimensions.get('window').width;
+
+// Helper to filter out null, undefined, NaN values, keep identical length, and pad single items
+function sanitizeChartData(labels: any[], values: any[]) {
+  const sanitizedLabels: string[] = [];
+  const sanitizedValues: number[] = [];
+
+  const len = Math.min(labels?.length || 0, values?.length || 0);
+  for (let i = 0; i < len; i++) {
+    const val = values[i];
+    const lbl = labels[i];
+    
+    // Check if value is a valid number
+    if (val !== null && val !== undefined && !isNaN(Number(val))) {
+      sanitizedLabels.push(String(lbl || ''));
+      sanitizedValues.push(Number(val));
+    }
+  }
+
+  if (sanitizedValues.length === 0) {
+    return null;
+  }
+
+  // Safety padding for single data points to avoid division-by-zero crashes
+  if (sanitizedValues.length === 1) {
+    return {
+      labels: ['', sanitizedLabels[0] || ''],
+      values: [sanitizedValues[0], sanitizedValues[0]],
+    };
+  }
+
+  return {
+    labels: sanitizedLabels,
+    values: sanitizedValues,
+  };
+}
 
 export default function AnalyticsScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -86,9 +136,10 @@ export default function AnalyticsScreen() {
     },
   };
 
-  // Compile Chart Datasets (no dummy fallbacks)
+  // Compile and Sanitize Chart Datasets (no dummy fallbacks)
   const scoreHistoryLabels = data?.scoreHistory?.map((h: any) => h.date) || [];
   const scoreHistoryValues = data?.scoreHistory?.map((h: any) => h.score) || [];
+  const sanitizedScore = sanitizeChartData(scoreHistoryLabels, scoreHistoryValues);
 
   const skillLabels = ['Comm', 'Tech', 'Behav', 'Lead'];
   const skillValues = [
@@ -97,34 +148,15 @@ export default function AnalyticsScreen() {
     data?.skillScores?.behavioral || 0,
     data?.skillScores?.leadership || 0,
   ];
+  const sanitizedSkills = sanitizeChartData(skillLabels, skillValues);
 
   const fillerWordTrendLabels = data?.fillerWordTrend?.map((h: any) => h.date) || [];
   const fillerWordTrendValues = data?.fillerWordTrend?.map((h: any) => h.count) || [];
+  const sanitizedFiller = sanitizeChartData(fillerWordTrendLabels, fillerWordTrendValues);
 
   const confidenceTrendLabels = data?.confidenceTrend?.map((h: any) => h.date) || [];
   const confidenceTrendValues = data?.confidenceTrend?.map((h: any) => h.score) || [];
-
-  // Safety padding for single data points to avoid division-by-zero crashes in react-native-chart-kit
-  let paddedScoreLabels = scoreHistoryLabels;
-  let paddedScoreValues = scoreHistoryValues;
-  if (scoreHistoryValues.length === 1) {
-    paddedScoreLabels = ['', scoreHistoryLabels[0]];
-    paddedScoreValues = [scoreHistoryValues[0], scoreHistoryValues[0]];
-  }
-
-  let paddedConfLabels = confidenceTrendLabels;
-  let paddedConfValues = confidenceTrendValues;
-  if (confidenceTrendValues.length === 1) {
-    paddedConfLabels = ['', confidenceTrendLabels[0]];
-    paddedConfValues = [confidenceTrendValues[0], confidenceTrendValues[0]];
-  }
-
-  let paddedFillerLabels = fillerWordTrendLabels;
-  let paddedFillerValues = fillerWordTrendValues;
-  if (fillerWordTrendValues.length === 1) {
-    paddedFillerLabels = ['', fillerWordTrendLabels[0]];
-    paddedFillerValues = [fillerWordTrendValues[0], fillerWordTrendValues[0]];
-  }
+  const sanitizedConfidence = sanitizeChartData(confidenceTrendLabels, confidenceTrendValues);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -192,85 +224,154 @@ export default function AnalyticsScreen() {
 
             {/* Score History Line Chart */}
             <Text style={styles.chartTitle}>Overall Score Trend</Text>
-            <GlassCard style={styles.chartCard}>
-              {scoreHistoryValues.length > 0 ? (
-                <LineChart
-                  data={{
-                    labels: paddedScoreLabels,
-                    datasets: [{ data: paddedScoreValues }],
-                  }}
-                  width={screenWidth - 56}
-                  height={200}
-                  yAxisSuffix="%"
-                  chartConfig={chartConfig}
-                  bezier={paddedScoreValues.length > 1}
-                  style={styles.chartStyle}
-                />
-              ) : (
-                <Text style={styles.noDataText}>No score history available</Text>
-              )}
-            </GlassCard>
+            <ErrorBoundary fallbackText="Overall Score Trend chart unavailable">
+              <GlassCard style={styles.chartCard}>
+                {sanitizedScore ? (
+                  Platform.OS === 'web' || !LineChart ? (
+                    <CustomSVGChart
+                      type="line"
+                      data={{
+                        labels: sanitizedScore.labels,
+                        datasets: [{ data: sanitizedScore.values }],
+                      }}
+                      width={screenWidth - 56}
+                      height={200}
+                      yAxisSuffix="%"
+                      chartConfig={chartConfig}
+                      bezier={sanitizedScore.values.length > 1}
+                      style={styles.chartStyle}
+                    />
+                  ) : (
+                    <LineChart
+                      data={{
+                        labels: sanitizedScore.labels,
+                        datasets: [{ data: sanitizedScore.values }],
+                      }}
+                      width={screenWidth - 56}
+                      height={200}
+                      yAxisSuffix="%"
+                      chartConfig={chartConfig}
+                      bezier={sanitizedScore.values.length > 1}
+                      style={styles.chartStyle}
+                    />
+                  )
+                ) : (
+                  <Text style={styles.noDataText}>No score history available</Text>
+                )}
+              </GlassCard>
+            </ErrorBoundary>
 
             {/* Skills Breakdown */}
             <Text style={styles.chartTitle}>Skills Breakdown</Text>
-            <GlassCard style={styles.chartCard}>
-              {skillValues.some(v => v > 0) ? (
-                <BarChart
-                  data={{
-                    labels: skillLabels,
-                    datasets: [{ data: skillValues }],
-                  }}
-                  width={screenWidth - 56}
-                  height={200}
-                  yAxisLabel=""
-                  yAxisSuffix="%"
-                  chartConfig={chartConfig}
-                  style={styles.chartStyle}
-                />
-              ) : (
-                <Text style={styles.noDataText}>No skills breakdown available</Text>
-              )}
-            </GlassCard>
+            <ErrorBoundary fallbackText="Skills Breakdown chart unavailable">
+              <GlassCard style={styles.chartCard}>
+                {sanitizedSkills ? (
+                  Platform.OS === 'web' || !BarChart ? (
+                    <CustomSVGChart
+                      type="bar"
+                      data={{
+                        labels: sanitizedSkills.labels,
+                        datasets: [{ data: sanitizedSkills.values }],
+                      }}
+                      width={screenWidth - 56}
+                      height={200}
+                      yAxisSuffix="%"
+                      chartConfig={chartConfig}
+                      style={styles.chartStyle}
+                    />
+                  ) : (
+                    <BarChart
+                      data={{
+                        labels: sanitizedSkills.labels,
+                        datasets: [{ data: sanitizedSkills.values }],
+                      }}
+                      width={screenWidth - 56}
+                      height={200}
+                      yAxisLabel=""
+                      yAxisSuffix="%"
+                      chartConfig={chartConfig}
+                      style={styles.chartStyle}
+                    />
+                  )
+                ) : (
+                  <Text style={styles.noDataText}>No skills breakdown available</Text>
+                )}
+              </GlassCard>
+            </ErrorBoundary>
 
             {/* Confidence Trend */}
             <Text style={styles.chartTitle}>Confidence Trend</Text>
-            <GlassCard style={styles.chartCard}>
-              {confidenceTrendValues.length > 0 ? (
-                <LineChart
-                  data={{
-                    labels: paddedConfLabels,
-                    datasets: [{ data: paddedConfValues }],
-                  }}
-                  width={screenWidth - 56}
-                  height={200}
-                  yAxisSuffix="%"
-                  chartConfig={secondaryChartConfig}
-                  bezier={paddedConfValues.length > 1}
-                  style={styles.chartStyle}
-                />
-              ) : (
-                <Text style={styles.noDataText}>No confidence trend available</Text>
-              )}
-            </GlassCard>
+            <ErrorBoundary fallbackText="Confidence Trend chart unavailable">
+              <GlassCard style={styles.chartCard}>
+                {sanitizedConfidence ? (
+                  Platform.OS === 'web' || !LineChart ? (
+                    <CustomSVGChart
+                      type="line"
+                      data={{
+                        labels: sanitizedConfidence.labels,
+                        datasets: [{ data: sanitizedConfidence.values }],
+                      }}
+                      width={screenWidth - 56}
+                      height={200}
+                      yAxisSuffix="%"
+                      chartConfig={secondaryChartConfig}
+                      bezier={sanitizedConfidence.values.length > 1}
+                      style={styles.chartStyle}
+                    />
+                  ) : (
+                    <LineChart
+                      data={{
+                        labels: sanitizedConfidence.labels,
+                        datasets: [{ data: sanitizedConfidence.values }],
+                      }}
+                      width={screenWidth - 56}
+                      height={200}
+                      yAxisSuffix="%"
+                      chartConfig={secondaryChartConfig}
+                      bezier={sanitizedConfidence.values.length > 1}
+                      style={styles.chartStyle}
+                    />
+                  )
+                ) : (
+                  <Text style={styles.noDataText}>No confidence trend available</Text>
+                )}
+              </GlassCard>
+            </ErrorBoundary>
 
             {/* Filler Word Trend */}
             <Text style={styles.chartTitle}>Filler Words Trend</Text>
-            <GlassCard style={styles.chartCard}>
-              {fillerWordTrendValues.length > 0 ? (
-                <LineChart
-                  data={{
-                    labels: paddedFillerLabels,
-                    datasets: [{ data: paddedFillerValues }],
-                  }}
-                  width={screenWidth - 56}
-                  height={200}
-                  chartConfig={chartConfig}
-                  style={styles.chartStyle}
-                />
-              ) : (
-                <Text style={styles.noDataText}>No filler words trend available</Text>
-              )}
-            </GlassCard>
+            <ErrorBoundary fallbackText="Filler Words Trend chart unavailable">
+              <GlassCard style={styles.chartCard}>
+                {sanitizedFiller ? (
+                  Platform.OS === 'web' || !LineChart ? (
+                    <CustomSVGChart
+                      type="line"
+                      data={{
+                        labels: sanitizedFiller.labels,
+                        datasets: [{ data: sanitizedFiller.values }],
+                      }}
+                      width={screenWidth - 56}
+                      height={200}
+                      chartConfig={chartConfig}
+                      style={styles.chartStyle}
+                    />
+                  ) : (
+                    <LineChart
+                      data={{
+                        labels: sanitizedFiller.labels,
+                        datasets: [{ data: sanitizedFiller.values }],
+                      }}
+                      width={screenWidth - 56}
+                      height={200}
+                      chartConfig={chartConfig}
+                      style={styles.chartStyle}
+                    />
+                  )
+                ) : (
+                  <Text style={styles.noDataText}>No filler words trend available</Text>
+                )}
+              </GlassCard>
+            </ErrorBoundary>
           </View>
         )}
       </ScrollView>
@@ -285,7 +386,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   loadingContainer: {
     flex: 1,

@@ -55,8 +55,8 @@ describe('E2E Verification Mock Run', () => {
     process.env.JWT_EXPIRES_IN = '1d';
     
     let jwtToken = jwt.sign({ id: 'mock_user_123' }, 'test_secret');
-    let resumeId = 'mock_resume_123';
-    let interviewId = 'mock_interview_456';
+    let resumeId = '507f1f77bcf86cd799439011';
+    let interviewId = '507f1f77bcf86cd799439022';
 
     // Mock User.findById for auth middleware
     (User.findById as jest.Mock).mockReturnValue({
@@ -177,7 +177,9 @@ describe('E2E Verification Mock Run', () => {
     report.push('**Response Body:**\n```json\n' + JSON.stringify(answerRes.body, null, 2) + '\n```\n');
 
     // 6. Submit Voice Transcript
-    const voicePayload = { questionId: 'q2', transcription: 'Um, I use Context API and Redux mostly.', duration: 10 };
+    const dummyAudioPath = path.join(__dirname, 'dummy.webm');
+    fs.writeFileSync(dummyAudioPath, 'dummy audio data');
+
     (Interview.findOne as jest.Mock).mockResolvedValue({
       _id: interviewId,
       questions: [
@@ -191,11 +193,13 @@ describe('E2E Verification Mock Run', () => {
     const voiceRes = await request(app)
       .post(`/api/interview/${interviewId}/answer/voice`)
       .set('Authorization', `Bearer ${jwtToken}`)
-      .send(voicePayload);
+      .field('questionIndex', '1')
+      .field('duration', '10')
+      .attach('audio', dummyAudioPath, 'answer_1.webm');
       
     report.push('## 6. Submit one voice transcript');
     report.push(`**Endpoint:** \`POST /api/interview/${interviewId}/answer/voice\``);
-    report.push('**Payload:**\n```json\n' + JSON.stringify(voicePayload, null, 2) + '\n```');
+    report.push('**Payload:** `multipart/form-data (audio file attached)`');
     report.push('**Response Body:**\n```json\n' + JSON.stringify(voiceRes.body, null, 2) + '\n```\n');
 
     // 7. Complete Interview

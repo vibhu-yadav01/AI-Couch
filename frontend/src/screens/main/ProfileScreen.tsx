@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   avatarHeader: {
     alignItems: 'center',

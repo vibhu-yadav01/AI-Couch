@@ -19,7 +19,10 @@ export const startInterview = async (req: AuthRequest, res: Response): Promise<v
     }
 
     // Get user's resume parsed data if exists
-    const resume = await Resume.findOne({ userId: req.user?.id }).sort({ uploadedAt: -1 });
+    const resumeQuery = Resume.findOne({ userId: req.user?.id });
+    const resume = resumeQuery && typeof (resumeQuery as any).sort === 'function'
+      ? await (resumeQuery as any).sort({ uploadedAt: -1 })
+      : await resumeQuery;
     const resumeData = resume ? resume.parsedData : undefined;
 
     // Number of questions: roughly 1 question per minute of duration, minimum 3, maximum 10
@@ -151,29 +154,47 @@ export const submitVoiceAnswer = async (req: AuthRequest, res: Response): Promis
     const interviewId = req.params.interviewId || req.body.interviewId;
     const duration = req.body.duration ? parseFloat(req.body.duration) : 30;
 
+    console.log('[submitVoiceAnswer] Voice answer upload request received:', {
+      interviewId,
+      params: req.params,
+      body: req.body,
+      file: req.file ? {
+        fieldname: req.file.fieldname,
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        path: req.file.path
+      } : null
+    });
+
     if (!interviewId) {
+      console.warn('[submitVoiceAnswer] 400 Rejection Reason: Missing interviewId');
       res.status(400).json({ success: false, error: 'Interview ID is required' });
       return;
     }
 
     if (!req.file) {
+      console.warn('[submitVoiceAnswer] 400 Rejection Reason: No uploaded file (req.file is undefined)');
       res.status(400).json({ success: false, error: 'No audio file uploaded' });
       return;
     }
 
     const interview = await Interview.findOne({ _id: interviewId, userId: req.user?.id });
     if (!interview) {
+      console.warn(`[submitVoiceAnswer] 404 Rejection Reason: Interview not found for id=${interviewId}`);
       res.status(404).json({ success: false, error: 'Interview session not found' });
       return;
     }
 
     if (interview.status === 'completed') {
+      console.warn(`[submitVoiceAnswer] 400 Rejection Reason: Interview session is already completed for id=${interviewId}`);
       res.status(400).json({ success: false, error: 'Interview session is already completed' });
       return;
     }
 
     const questionIndex = interview.answers.length;
     if (questionIndex >= interview.questions.length) {
+      console.warn(`[submitVoiceAnswer] 400 Rejection Reason: All questions have already been answered for id=${interviewId}`);
       res.status(400).json({ success: false, error: 'All questions have already been answered' });
       return;
     }

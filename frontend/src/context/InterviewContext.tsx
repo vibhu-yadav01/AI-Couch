@@ -18,7 +18,7 @@ interface InterviewState {
 interface InterviewContextType extends InterviewState {
   startInterview: (setup: InterviewSetup) => Promise<Interview>;
   submitAnswer: (text: string) => Promise<void>;
-  submitVoiceAnswer: (uri: string) => Promise<void>;
+  submitVoiceAnswer: (uri: string, duration?: number) => Promise<void>;
   resetInterview: () => void;
   nextQuestion: () => void;
 }
@@ -129,7 +129,7 @@ export const InterviewProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const submitVoiceAnswer = async (uri: string) => {
+  const submitVoiceAnswer = async (uri: string, duration?: number) => {
     if (!state.currentInterview) return;
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
@@ -137,7 +137,8 @@ export const InterviewProvider = ({ children }: { children: ReactNode }) => {
       const data = await submitVoiceAnswerApi(
         state.currentInterview._id,
         uri,
-        questionIndex
+        questionIndex,
+        duration
       );
       const updatedInterview = extractInterview(data);
       if (updatedInterview) {

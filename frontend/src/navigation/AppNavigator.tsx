@@ -1,12 +1,12 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
 import { useAuth } from '../context/AuthContext';
-import { Colors } from '../utils/colors';
+import { Colors, ThemeStyles } from '../utils/colors';
 
 // Auth Screens
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
@@ -130,29 +130,26 @@ function ProfileStackNavigator() {
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopColor: Colors.border,
-          borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 4,
-        },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textMuted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap = 'home';
-          if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
-          else if (route.name === 'Resume') iconName = focused ? 'document-text' : 'document-text-outline';
-          else if (route.name === 'Practice') iconName = focused ? 'mic' : 'mic-outline';
-          else if (route.name === 'Analytics') iconName = focused ? 'bar-chart' : 'bar-chart-outline';
-          else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-      })}
+      screenOptions={({ route }) => {
+        const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+        const hideTabBar = ['TextInterview', 'VoiceInterview', 'Results', 'InterviewSetup'].includes(routeName);
+        return {
+          headerShown: false,
+          tabBarStyle: hideTabBar ? { display: 'none' } : ThemeStyles.floatingTabBar,
+          tabBarActiveTintColor: Colors.primary,
+          tabBarInactiveTintColor: Colors.textMuted,
+          tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName: keyof typeof Ionicons.glyphMap = 'home';
+            if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
+            else if (route.name === 'Resume') iconName = focused ? 'document-text' : 'document-text-outline';
+            else if (route.name === 'Practice') iconName = focused ? 'mic' : 'mic-outline';
+            else if (route.name === 'Analytics') iconName = focused ? 'bar-chart' : 'bar-chart-outline';
+            else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+        };
+      }}
     >
       <Tab.Screen name="Home" component={HomeStackNavigator} />
       <Tab.Screen name="Resume" component={ResumeStackNavigator} />

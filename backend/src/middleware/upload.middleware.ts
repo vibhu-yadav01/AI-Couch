@@ -63,14 +63,30 @@ const audioFileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ) => {
-  const allowedMimes = ['audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/m4a', 'audio/webm', 'audio/ogg', 'audio/x-m4a'];
-  const allowedExts = ['.mp3', '.wav', '.m4a', '.webm', '.ogg'];
+  const allowedMimes = [
+    'audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/m4a', 'audio/webm', 
+    'audio/ogg', 'audio/x-m4a', 'audio/x-caf', 'audio/caf', 'audio/aac', 'audio/3gpp'
+  ];
+  const allowedExts = ['.mp3', '.wav', '.m4a', '.webm', '.ogg', '.caf', '.aac', '.3gp'];
   const ext = path.extname(file.originalname).toLowerCase();
+  const baseMime = file.mimetype ? file.mimetype.split(';')[0].toLowerCase().trim() : '';
 
-  if (allowedMimes.includes(file.mimetype) || allowedExts.includes(ext)) {
+  console.log('[upload.middleware] Audio file upload attempt:', {
+    fieldname: file.fieldname,
+    originalname: file.originalname,
+    mimetype: file.mimetype,
+    baseMime,
+    ext
+  });
+
+  if (allowedMimes.includes(file.mimetype) || allowedMimes.includes(baseMime) || allowedExts.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Only audio files (MP3, WAV, M4A, WEBM) are allowed'));
+    const errorMsg = `Unsupported audio format. Received mimetype: '${file.mimetype}', extension: '${ext}'`;
+    console.warn('[upload.middleware] Rejected audio file upload:', errorMsg);
+    const error = new Error(errorMsg) as any;
+    error.status = 400;
+    cb(error);
   }
 };
 

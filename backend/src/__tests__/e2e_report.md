@@ -18,7 +18,7 @@
   "success": true,
   "message": "Registration successful",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0MzEyMDE3LCJleHAiOjE3ODQzOTg0MTd9.GhlzdRCCuObJKkiobxnZQ4PknQ9KxTVR6374NPSkxVo",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0NjYwMTYxLCJleHAiOjE3ODQ3NDY1NjF9.nOrMdCWQ8hr8GHwDb2MABwyEYzVoWPCYH-Kw4ri1Yy8",
     "user": {
       "id": "mock_user_123",
       "name": "E2E Tester",
@@ -45,7 +45,7 @@
   "success": true,
   "message": "Login successful",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0MzEyMDE4LCJleHAiOjE3ODQzOTg0MTh9.FK-AxtxFsQHJASi1IDuHbo0r58kV9xqViBfhJIfSnXg",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1vY2tfdXNlcl8xMjMiLCJlbWFpbCI6ImUyZUB0ZXN0ZXIuY29tIiwiaWF0IjoxNzg0NjYwMTYxLCJleHAiOjE3ODQ3NDY1NjF9.nOrMdCWQ8hr8GHwDb2MABwyEYzVoWPCYH-Kw4ri1Yy8",
     "user": {
       "id": "mock_user_123",
       "email": "e2e@tester.com"
@@ -73,7 +73,7 @@
   "role": "Software Engineer",
   "type": "technical",
   "difficulty": "intermediate",
-  "resumeId": "mock_resume_123"
+  "resumeId": "507f1f77bcf86cd799439011"
 }
 ```
 **Response Body:**
@@ -85,7 +85,7 @@
 ```
 
 ## 5. Submit one text answer
-**Endpoint:** `POST /api/interview/mock_interview_456/answer/text`
+**Endpoint:** `POST /api/interview/507f1f77bcf86cd799439022/answer/text`
 **Payload:**
 ```json
 {
@@ -100,10 +100,6 @@
   "error": "Validation Error",
   "details": [
     {
-      "field": "interviewId",
-      "message": "Invalid Interview ID"
-    },
-    {
       "field": "answerText",
       "message": "Answer text is required"
     }
@@ -112,26 +108,62 @@
 ```
 
 ## 6. Submit one voice transcript
-**Endpoint:** `POST /api/interview/mock_interview_456/answer/voice`
-**Payload:**
-```json
-{
-  "questionId": "q2",
-  "transcription": "Um, I use Context API and Redux mostly.",
-  "duration": 10
-}
-```
+**Endpoint:** `POST /api/interview/507f1f77bcf86cd799439022/answer/voice`
+**Payload:** `multipart/form-data (audio file attached)`
 **Response Body:**
 ```json
 {
-  "success": false,
-  "error": "Validation Error",
-  "details": [
-    {
-      "field": "interviewId",
-      "message": "Invalid Interview ID"
-    }
-  ]
+  "success": true,
+  "data": {
+    "interview": {
+      "_id": "507f1f77bcf86cd799439022",
+      "questions": [
+        {
+          "id": "q1",
+          "text": "Describe a challenging project you worked on.",
+          "type": "behavioral"
+        },
+        {
+          "id": "q2",
+          "text": "How do you handle state in React?",
+          "type": "technical"
+        }
+      ],
+      "answers": [
+        {
+          "questionId": "q1",
+          "answer": "test",
+          "score": 80
+        },
+        {
+          "questionIndex": 1,
+          "questionText": "How do you handle state in React?",
+          "audioUrl": "/uploads/4f99f489-e264-475c-bfec-5fd644d98ca1.webm",
+          "speechAnalysis": {
+            "confidenceScore": 0,
+            "fillerWordCount": 0,
+            "speechRate": 0,
+            "pauseCount": 0,
+            "fillerWords": [],
+            "totalDuration": 10
+          }
+        }
+      ],
+      "score": 0,
+      "status": "completed"
+    },
+    "isCompleted": true,
+    "speechAnalysis": {
+      "confidenceScore": 0,
+      "fillerWordCount": 0,
+      "speechRate": 0,
+      "pauseCount": 0,
+      "fillerWords": [],
+      "totalDuration": 10
+    },
+    "nextQuestion": null,
+    "questionIndex": 1
+  }
 }
 ```
 
@@ -140,7 +172,7 @@
 **Payload:**
 ```json
 {
-  "interviewId": "mock_interview_456"
+  "interviewId": "507f1f77bcf86cd799439022"
 }
 ```
 **Response Body:**
@@ -149,7 +181,7 @@
   "success": true,
   "message": "Interview session completed",
   "data": {
-    "_id": "mock_interview_456",
+    "_id": "507f1f77bcf86cd799439022",
     "questions": [
       {},
       {}

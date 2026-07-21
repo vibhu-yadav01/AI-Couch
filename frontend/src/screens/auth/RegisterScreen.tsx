@@ -41,6 +41,7 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
@@ -105,8 +106,13 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
 
           <Animated.View style={[styles.form, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
             {/* Name */}
-            <View style={styles.inputWrapper}>
-              <Ionicons name="person-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, focusedField === 'name' && styles.inputWrapperFocused]}>
+              <Ionicons
+                name="person-outline"
+                size={18}
+                color={focusedField === 'name' ? Colors.primary : Colors.textMuted}
+                style={styles.inputIcon}
+              />
               <TextInput
                 style={styles.input}
                 placeholder="Full Name *"
@@ -114,12 +120,19 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
                 value={name}
                 onChangeText={setName}
                 autoCapitalize="words"
+                onFocus={() => setFocusedField('name')}
+                onBlur={() => setFocusedField(null)}
               />
             </View>
 
             {/* Email */}
-            <View style={styles.inputWrapper}>
-              <Ionicons name="mail-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, focusedField === 'email' && styles.inputWrapperFocused]}>
+              <Ionicons
+                name="mail-outline"
+                size={18}
+                color={focusedField === 'email' ? Colors.primary : Colors.textMuted}
+                style={styles.inputIcon}
+              />
               <TextInput
                 style={styles.input}
                 placeholder="Email Address *"
@@ -129,24 +142,38 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
+                onFocus={() => setFocusedField('email')}
+                onBlur={() => setFocusedField(null)}
               />
             </View>
 
             {/* Target Role */}
-            <View style={styles.inputWrapper}>
-              <Ionicons name="briefcase-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, focusedField === 'targetRole' && styles.inputWrapperFocused]}>
+              <Ionicons
+                name="briefcase-outline"
+                size={18}
+                color={focusedField === 'targetRole' ? Colors.primary : Colors.textMuted}
+                style={styles.inputIcon}
+              />
               <TextInput
                 style={styles.input}
                 placeholder="Target Role (e.g. Software Engineer)"
                 placeholderTextColor={Colors.textMuted}
                 value={targetRole}
                 onChangeText={setTargetRole}
+                onFocus={() => setFocusedField('targetRole')}
+                onBlur={() => setFocusedField(null)}
               />
             </View>
 
             {/* Password */}
-            <View style={styles.inputWrapper}>
-              <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, focusedField === 'password' && styles.inputWrapperFocused]}>
+              <Ionicons
+                name="lock-closed-outline"
+                size={18}
+                color={focusedField === 'password' ? Colors.primary : Colors.textMuted}
+                style={styles.inputIcon}
+              />
               <TextInput
                 style={[styles.input, styles.passwordInput]}
                 placeholder="Password *"
@@ -155,6 +182,8 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
+                onFocus={() => setFocusedField('password')}
+                onBlur={() => setFocusedField(null)}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
                 <Ionicons
@@ -166,8 +195,13 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
             </View>
 
             {/* Confirm Password */}
-            <View style={styles.inputWrapper}>
-              <Ionicons name="shield-checkmark-outline" size={18} color={Colors.textMuted} style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, focusedField === 'confirmPassword' && styles.inputWrapperFocused]}>
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={18}
+                color={focusedField === 'confirmPassword' ? Colors.primary : Colors.textMuted}
+                style={styles.inputIcon}
+              />
               <TextInput
                 style={[styles.input, styles.passwordInput]}
                 placeholder="Confirm Password *"
@@ -176,6 +210,8 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
+                onFocus={() => setFocusedField('confirmPassword')}
+                onBlur={() => setFocusedField(null)}
               />
               <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeButton}>
                 <Ionicons
@@ -284,8 +320,12 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: Colors.surfaceLight, borderRadius: 14,
-    borderWidth: 1, borderColor: Colors.border,
+    borderWidth: 1.5, borderColor: 'rgba(108, 99, 255, 0.15)',
     marginBottom: 14, paddingHorizontal: 16, height: 54,
+  },
+  inputWrapperFocused: {
+    borderColor: Colors.primary,
+    backgroundColor: 'rgba(30, 30, 64, 0.95)',
   },
   inputIcon: { marginRight: 12 },
   input: { flex: 1, color: Colors.text, fontSize: 15, fontWeight: '500' },

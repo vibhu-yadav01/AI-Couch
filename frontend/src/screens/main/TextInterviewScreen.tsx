@@ -160,26 +160,27 @@ export default function TextInterviewScreen() {
           contentContainerStyle={styles.messageScrollContent}
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
         >
-          {messages.map((msg) => (
-            <View
-              key={msg.id}
-              style={[
-                styles.bubbleRow,
-                msg.sender === 'user' ? styles.bubbleRowUser : styles.bubbleRowAi,
-              ]}
-            >
-              {msg.sender === 'ai' ? (
-                <QuestionBubble 
-                  text={msg.text} 
-                  typewriter={msg.typewriter} 
-                />
-              ) : (
+          {messages.map((msg) =>
+            msg.sender === 'ai' ? (
+              <QuestionBubble
+                key={msg.id}
+                text={msg.text}
+                typewriter={msg.typewriter}
+              />
+            ) : (
+              <View
+                key={msg.id}
+                style={[
+                  styles.bubbleRow,
+                  styles.bubbleRowUser,
+                ]}
+              >
                 <GlassCard style={styles.userBubble}>
                   <Text style={styles.userBubbleText}>{msg.text}</Text>
                 </GlassCard>
-              )}
-            </View>
-          ))}
+              </View>
+            )
+          )}
         </ScrollView>
 
         {/* Input Bar */}

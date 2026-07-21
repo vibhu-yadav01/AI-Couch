@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import {
-  TouchableOpacity,
+  Pressable,
   Text,
   StyleSheet,
   Animated,
@@ -56,12 +56,14 @@ export default function GradientButton({
 
   return (
     <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, style]}>
-      <TouchableOpacity
+      <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled || loading}
-        activeOpacity={1}
+        style={({ pressed }) => [
+          { opacity: pressed ? 0.9 : 1.0 }
+        ]}
       >
         <LinearGradient
           colors={(disabled ? ['#444', '#333'] : finalGradient) as [string, string, ...string[]]}
@@ -75,7 +77,7 @@ export default function GradientButton({
             <Text style={[styles.text, textStyle]}>{title}</Text>
           )}
         </LinearGradient>
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 }

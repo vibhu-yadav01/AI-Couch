@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
+  Pressable,
   ActivityIndicator,
   Alert,
   Animated,
@@ -13,6 +13,7 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+// TODO: Migrate from expo-av to expo-audio when expo-audio is fully stable in SDK 56.
 import { Audio } from 'expo-av';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -119,8 +120,18 @@ export default function VoiceInterviewScreen() {
         playsInSilentModeIOS: true,
       });
 
+      const iosM4aOptions = {
+        android: Audio.RecordingOptionsPresets.HIGH_QUALITY.android,
+        ios: {
+          ...Audio.RecordingOptionsPresets.HIGH_QUALITY.ios,
+          extension: '.m4a',
+          outputFormat: Audio.IOSOutputFormat?.MPEG4AAC || 'aac ',
+        },
+        web: Audio.RecordingOptionsPresets.HIGH_QUALITY.web,
+      };
+
       const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
+        iosM4aOptions
       );
 
       setRecording(newRecording);
@@ -148,15 +159,24 @@ export default function VoiceInterviewScreen() {
 
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
+      const finalDuration = recordTime;
       setRecording(null);
+
+      console.log('[VoiceInterviewScreen] Audio recording completed:', {
+        uri,
+        duration: finalDuration,
+      });
 
       if (uri) {
         try {
-          await submitVoiceAnswer(uri);
+          await submitVoiceAnswer(uri, finalDuration);
         } catch (error: any) {
           const msg = extractErrorMessage(error);
+          console.error('[VoiceInterviewScreen] submitVoiceAnswer failed:', msg, error);
           Alert.alert('Recording Submission Failed', msg);
         }
+      } else {
+        console.warn('[VoiceInterviewScreen] Recording URI is null or empty!');
       }
     } catch (err) {
       console.error('Failed to stop recording:', err);
@@ -198,15 +218,18 @@ export default function VoiceInterviewScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.closeButton}
+        <Pressable
+          style={({ pressed }) => [
+            styles.closeButton,
+            { opacity: pressed ? 0.7 : 1.0 }
+          ]}
           onPress={() => {
             resetInterview();
             (navigation as any).navigate('Home', { screen: 'HomeMain' });
           }}
         >
           <Ionicons name="close" size={24} color={Colors.textSecondary} />
-        </TouchableOpacity>
+        </Pressable>
 
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle} numberOfLines={1}>
@@ -274,11 +297,12 @@ export default function VoiceInterviewScreen() {
           )}
 
           <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-            <TouchableOpacity
-              style={[
+            <Pressable
+              style={({ pressed }) => [
                 styles.micButton,
                 isRecording && styles.micButtonRecording,
                 isLoading && styles.micButtonDisabled,
+                { opacity: pressed ? 0.8 : 1.0 }
               ]}
               onPress={toggleRecording}
               disabled={isLoading}
@@ -288,7 +312,7 @@ export default function VoiceInterviewScreen() {
                 size={32}
                 color={Colors.white}
               />
-            </TouchableOpacity>
+            </Pressable>
           </Animated.View>
         </View>
       </View>

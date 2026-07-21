@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import apiClient from './client';
 import { InterviewSetup } from '../types';
 
@@ -14,18 +15,70 @@ export const submitTextAnswer = async (interviewId: string, answerText: string) 
 export const submitVoiceAnswer = async (
   interviewId: string,
   audioUri: string,
-  questionIndex: number
+  questionIndex: number,
+  duration?: number
 ) => {
+  console.log('[interview.api] Preparing voice answer submission:', {
+    interviewId,
+    audioUri,
+    questionIndex,
+    duration,
+    platform: Platform.OS
+  });
+
   const formData = new FormData();
-  formData.append('audio', {
-    uri: audioUri,
-    type: 'audio/m4a',
-    name: `answer_${questionIndex}.m4a`,
-  } as any);
+
+  if (Platform.OS === 'web') {
+    const response = await fetch(audioUri);
+    const blob = await response.blob();
+    const mimeType = blob.type || 'audio/webm';
+    const ext = mimeType.split('/')[1]?.split(';')[0] || 'webm';
+    const filename = `answer_${questionIndex}.${ext}`;
+    
+    console.log('[interview.api] Web blob fetched:', {
+      blobSize: blob.size,
+      blobType: blob.type,
+      assignedMimeType: mimeType,
+      filename
+    });
+
+    formData.append('audio', blob, filename);
+  } else {
+    const ext = audioUri.split('.').pop()?.toLowerCase() || 'm4a';
+    let mimeType = 'audio/m4a';
+    if (ext === 'wav') mimeType = 'audio/wav';
+    else if (ext === 'caf') mimeType = 'audio/x-caf';
+    else if (ext === 'webm') mimeType = 'audio/webm';
+    else if (ext === 'mp3') mimeType = 'audio/mpeg';
+
+    const filename = `answer_${questionIndex}.${ext}`;
+
+    console.log('[interview.api] Native audio file details:', {
+      uri: audioUri,
+      mimeType,
+      filename
+    });
+
+    formData.append('audio', {
+      uri: audioUri,
+      type: mimeType,
+      name: filename,
+    } as any);
+  }
+
   formData.append('questionIndex', String(questionIndex));
+  if (duration !== undefined) {
+    formData.append('duration', String(duration));
+  }
+
+  console.log('[interview.api] Sending POST /interview/' + interviewId + '/answer/voice with multipart/form-data');
 
   const response = await apiClient.post(`/interview/${interviewId}/answer/voice`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
+
   return response.data;
 };
 

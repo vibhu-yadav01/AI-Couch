@@ -26,8 +26,12 @@ const AUDIO_MIME: Record<string, string> = {
   mp3: 'audio/mpeg',
   wav: 'audio/wav',
   m4a: 'audio/mp4',
+  mp4: 'audio/mp4',
   webm: 'audio/webm',
   ogg: 'audio/ogg',
+  caf: 'audio/x-caf',
+  aac: 'audio/aac',
+  '3gp': 'audio/3gpp',
 };
 
 /**

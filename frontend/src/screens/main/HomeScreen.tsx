@@ -6,6 +6,7 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  Pressable,
   ActivityIndicator,
   SafeAreaView,
   StatusBar,
@@ -109,12 +110,15 @@ export default function HomeScreen() {
             <Text style={styles.greetingText}>{getGreeting()},</Text>
             <Text style={styles.userNameText}>{user?.name || 'Coach User'} 👋</Text>
           </View>
-          <TouchableOpacity
-            style={styles.profileButton}
-            onPress={() => navigation.navigate('ProfileMain' as any)}
+          <Pressable
+            style={({ pressed }) => [
+              styles.profileButton,
+              { opacity: pressed ? 0.7 : 1 }
+            ]}
+            onPress={() => navigation.navigate('Profile' as any)}
           >
             <Ionicons name="person-circle-outline" size={40} color={Colors.primary} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* Stats Row */}
@@ -249,7 +253,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   loadingContainer: {
     flex: 1,

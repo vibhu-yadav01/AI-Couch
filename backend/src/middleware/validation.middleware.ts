@@ -14,13 +14,17 @@ export const validate = (validations: ValidationChain[]) => {
       return next();
     }
 
+    const errDetails = errors.array().map((err) => ({
+      field: (err as any).path || '',
+      message: err.msg,
+    }));
+
+    console.warn('[validation.middleware] Validation failed for route:', req.originalUrl, JSON.stringify(errDetails));
+
     res.status(400).json({
       success: false,
       error: 'Validation Error',
-      details: errors.array().map((err) => ({
-        field: (err as any).path || '',
-        message: err.msg,
-      })),
+      details: errDetails,
     });
   };
 };
