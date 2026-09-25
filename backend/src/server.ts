@@ -1,6 +1,5 @@
 import path from 'path';
 import dotenv from "dotenv";
-dotenv.config();
 // Configure environment variables before importing App
 dotenv.config();
 
@@ -37,7 +36,7 @@ const startServer = async () => {
 
     process.on('SIGTERM', () => handleShutdown('SIGTERM'));
     process.on('SIGINT', () => handleShutdown('SIGINT'));
-    
+
   } catch (error) {
     console.error('Fatal server start error:', error);
     process.exit(1);
