@@ -11,15 +11,63 @@ import analyticsRoutes from './routes/analytics.routes';
 import { errorHandler } from './middleware/error.middleware';
 import dotenv from "dotenv";
 dotenv.config();
+
 const app = express();
+
+// Configure trust proxy before rate limiting and proxy-dependent logic
+app.set("trust proxy", 1);
+
+// Configure CORS allowlist
+const allowedOrigins = [
+  "http://localhost:8081",
+  "http://localhost:3000",
+  "https://ai-couch-eight.vercel.app",
+  process.env.CLIENT_URL,
+].filter(Boolean) as string[];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests without an Origin header (server-to-server, health checks, etc.)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`[CORS] Blocked origin: ${origin}`);
+    return callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+
+  credentials: true,
+
+  methods: [
+    "GET",
+    "HEAD",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+  ],
+
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+  ],
+};
+
+// CORS middleware MUST run before rate-limiting and routes
+app.use(cors(corsOptions));
+
+// Explicit preflight handling for all routes
+app.options("*", cors(corsOptions));
 
 // Security HTTP headers
 app.use(helmet({
   crossOriginResourcePolicy: false // Allows serving files locally
 }));
-
-// CORS setup
-app.use(cors({ origin: '*' }));
 
 // Logging
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
@@ -61,3 +109,4 @@ app.use('*', (_req, res) => {
 app.use(errorHandler);
 
 export default app;
+
