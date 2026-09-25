@@ -6,12 +6,35 @@ AI Interview Coach is a premium, cross-platform mobile application designed to h
 
 ```mermaid
 graph TD
-    User([User Mobile App]) -->|React Native / Expo| Frontend[Mobile Client]
-    Frontend -->|API Requests| Backend[Node.js / Express Server]
-    Backend -->|Data Persistence| DB[(MongoDB)]
+    User([User Mobile App]) -->|React Native / Expo| Frontend[Mobile Client - Vercel]
+    Frontend -->|API Requests| Backend[Node.js / Express Server - Render]
+    Backend -->|Data Persistence| DB[(MongoDB Atlas)]
     Backend -->|Text/Audio AI| AI[OpenAI / Gemini Services]
     Backend -->|File Storage| Storage[Local Disk / AWS S3]
 ```
+
+---
+
+## Production Deployment
+
+- **Frontend (Vercel):** [https://ai-couch-eight.vercel.app](https://ai-couch-eight.vercel.app)
+- **Backend (Render):** [https://ai-couch-backend.onrender.com](https://ai-couch-backend.onrender.com)
+- **API Base Endpoint:** `https://ai-couch-backend.onrender.com/api`
+
+### Production Architecture
+`Vercel → Render → MongoDB Atlas + Gemini`
+
+### Render Backend Setup
+- **Root Directory:** `backend`
+- **Build Command:** `npm install && npm run build`
+- **Start Command:** `npm start`
+- **Environment Variables:**
+  - `NODE_ENV=production`
+  - `CLIENT_URL=https://ai-couch-eight.vercel.app`
+  - `MONGODB_URI=your-mongodb-atlas-connection-string`
+  - `JWT_SECRET=your-production-jwt-secret`
+  - `AI_PROVIDER=gemini` (or `openai`)
+  - `GEMINI_API_KEY=your-gemini-api-key`
 
 ---
 
