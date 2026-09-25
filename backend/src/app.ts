@@ -14,10 +14,10 @@ dotenv.config();
 
 const app = express();
 
-// Configure trust proxy before rate limiting and proxy-dependent logic
+// Railway & Reverse Proxy trust configuration (must be before rate limiters)
 app.set("trust proxy", 1);
 
-// Configure CORS allowlist
+// Allowed origins explicit allowlist
 const allowedOrigins = [
   "http://localhost:8081",
   "http://localhost:3000",
@@ -27,7 +27,7 @@ const allowedOrigins = [
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    // Allow requests without an Origin header (server-to-server, health checks, etc.)
+    // Allow requests without an Origin header (server-to-server, health checks, curl, etc.)
     if (!origin) {
       return callback(null, true);
     }
@@ -37,7 +37,7 @@ const corsOptions: cors.CorsOptions = {
     }
 
     console.warn(`[CORS] Blocked origin: ${origin}`);
-    return callback(new Error(`CORS blocked origin: ${origin}`));
+    return callback(null, false);
   },
 
   credentials: true,
@@ -56,13 +56,17 @@ const corsOptions: cors.CorsOptions = {
     "Content-Type",
     "Authorization",
   ],
+
+  optionsSuccessStatus: 204,
 };
 
-// CORS middleware MUST run before rate-limiting and routes
-app.use(cors(corsOptions));
+const corsMiddleware = cors(corsOptions);
 
-// Explicit preflight handling for all routes
-app.options("*", cors(corsOptions));
+// CORS middleware MUST run before rate-limiting and routes
+app.use(corsMiddleware);
+
+// Handle preflight OPTIONS requests for all routes
+app.options("*", corsMiddleware);
 
 // Security HTTP headers
 app.use(helmet({

@@ -13,16 +13,18 @@ const PORT = process.env.PORT || 5000;
 // Start database connection and listening
 const startServer = async () => {
   try {
-    // Fail fast on AI misconfiguration BEFORE accepting traffic, rather than
-    // deferring failures (and silent fallbacks) to the first AI request.
-    const aiConfig = validateAIConfig();
-    console.log(`🤖 AI provider: ${aiConfig.provider} (model: ${aiConfig.provider === 'gemini' ? aiConfig.geminiModel : aiConfig.openaiModel})`);
-
-    await connectDB();
-    
     const server = app.listen(Number(PORT), '0.0.0.0', () => {
       console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
     });
+
+    try {
+      const aiConfig = validateAIConfig();
+      console.log(`🤖 AI provider: ${aiConfig.provider} (model: ${aiConfig.provider === 'gemini' ? aiConfig.geminiModel : aiConfig.openaiModel})`);
+    } catch (aiErr: any) {
+      console.warn(`⚠️ AI configuration warning: ${aiErr.message}`);
+    }
+
+    await connectDB();
 
     // Handle system signals for graceful shutdown
     const handleShutdown = (signal: string) => {
