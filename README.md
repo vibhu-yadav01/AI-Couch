@@ -1,23 +1,23 @@
 # AI Interview Coach
 
-AI Interview Coach is a premium, cross-platform mobile application designed to help job seekers and students prepare for interviews. Built with **React Native (Expo + TypeScript)** and a **Node.js/Express + MongoDB** backend, it leverages state-of-the-art AI language models (OpenAI GPT-4o-mini & Google Gemini) to deliver realistic mock interviews, real-time audio transcription, speech metrics analysis, and granular performance tracking.
+AI Interview Coach is a premium, cross-platform application (React Native mobile app & Expo Web deployment) designed to help job seekers and students prepare for interviews. Built with **React Native (Expo + TypeScript)** and a **Node.js/Express + MongoDB** backend, it leverages Google Gemini (`gemini-3.1-flash-lite` in production) to deliver realistic mock interviews, real-time audio transcription, speech metrics analysis, and granular performance tracking.
 
 ## System Architecture
 
 ```mermaid
 graph TD
-    User([User Mobile App]) -->|React Native / Expo| Frontend[Mobile Client - Vercel]
-    Frontend -->|API Requests| Backend[Node.js / Express Server - Render]
-    Backend -->|Data Persistence| DB[(MongoDB Atlas)]
-    Backend -->|Text/Audio AI| AI[OpenAI / Gemini Services]
-    Backend -->|File Storage| Storage[Local Disk / AWS S3]
+    User([User]) --> Client[Expo React Native / Expo Web]
+    Client -->|Web Hosting| Vercel[Vercel - Expo Web Build]
+    Vercel -->|API Requests| Render[Render - Express API]
+    Render -->|Data Persistence| DB[(MongoDB Atlas)]
+    Render -->|AI Services| AI[Google Gemini]
 ```
 
 ---
 
 ## Production Deployment
 
-- **Frontend (Vercel):** [https://ai-couch-eight.vercel.app](https://ai-couch-eight.vercel.app)
+- **Frontend (Vercel):** [https://ai-couch-eight.vercel.app](https://ai-couch-eight.vercel.app) *(hosts the Expo Web production build)*
 - **Backend (Render):** [https://ai-couch-backend.onrender.com](https://ai-couch-backend.onrender.com)
 - **API Base Endpoint:** `https://ai-couch-backend.onrender.com/api`
 
@@ -33,7 +33,8 @@ graph TD
   - `CLIENT_URL=https://ai-couch-eight.vercel.app`
   - `MONGODB_URI=your-mongodb-atlas-connection-string`
   - `JWT_SECRET=your-production-jwt-secret`
-  - `AI_PROVIDER=gemini` (or `openai`)
+  - `AI_PROVIDER=gemini`
+  - `GEMINI_MODEL=gemini-3.1-flash-lite`
   - `GEMINI_API_KEY=your-gemini-api-key`
 
 ---
@@ -51,8 +52,9 @@ graph TD
 
 ## Technology Stack
 
-### Frontend (Mobile App)
+### Frontend (Mobile & Web)
 - **Framework:** React Native + Expo (TypeScript)
+- **Web Deployment:** Vercel (hosts Expo Web production build)
 - **Navigation:** React Navigation (Native Stack + Bottom Tabs)
 - **State Management:** React Context (Auth, Interview)
 - **Audio Processing:** `expo-av` (recording) & `expo-document-picker`
@@ -61,8 +63,8 @@ graph TD
 
 ### Backend (API Server)
 - **Runtime:** Node.js + Express (TypeScript)
-- **Database:** MongoDB + Mongoose
-- **AI Integration:** OpenAI API (GPT-4o-mini & Whisper) & Google Generative AI (Gemini 1.5 Flash)
+- **Database:** MongoDB + Mongoose (MongoDB Atlas in production)
+- **AI Integration:** Google Generative AI (Production: `gemini-3.1-flash-lite`; optional development support for OpenAI)
 - **Parsers:** `pdf-parse` (PDF) & `mammoth` (Word/DOCX)
 - **File Upload:** Multer (with diskStorage)
 - **Security:** JWT Authentication, Helmet, CORS, and Express Rate Limiting
