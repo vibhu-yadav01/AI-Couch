@@ -14,59 +14,16 @@ dotenv.config();
 
 const app = express();
 
-// Railway & Reverse Proxy trust configuration (must be before rate limiters)
 app.set("trust proxy", 1);
 
-// Allowed origins explicit allowlist
-const allowedOrigins = [
-  "http://localhost:8081",
-  "http://localhost:3000",
-  "https://ai-couch-eight.vercel.app",
-  process.env.CLIENT_URL,
-].filter(Boolean) as string[];
-
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests without an Origin header (server-to-server, health checks, curl, etc.)
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    console.warn(`[CORS] Blocked origin: ${origin}`);
-    return callback(null, false);
-  },
-
-  credentials: true,
-
-  methods: [
-    "GET",
-    "HEAD",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
-  ],
-
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-  ],
-
-  optionsSuccessStatus: 204,
-};
-
-const corsMiddleware = cors(corsOptions);
-
-// CORS middleware MUST run before rate-limiting and routes
-app.use(corsMiddleware);
-
-// Handle preflight OPTIONS requests for all routes
-app.options("*", corsMiddleware);
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Security HTTP headers
 app.use(helmet({
